@@ -5,6 +5,7 @@ import { AuthService } from '../shared/auth.service';
 // class FakeAuthService {
 //   user = 'fake';
 // }
+// providers:[{provide: AuthService, useClass: FakeAuthService}]
 
 @Component({
   selector: 'lab-header',
