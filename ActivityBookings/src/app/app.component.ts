@@ -8,11 +8,9 @@ import { HeaderComponent } from './core/header.component';
   imports: [RouterOutlet, HeaderComponent],
   template: `
     <lab-header />
-    <h1>Welcome to {{ title }}!</h1>
+    <h1>Welcome to Modern Angular!</h1>
     <router-outlet />
   `,
   styles: [],
 })
-export class AppComponent {
-  title = 'ActivityBookings';
-}
+export class AppComponent {}
