@@ -21,6 +21,12 @@
             "style": "camelCase"
           }
         ],
+        "@angular-eslint/component-class-suffix": [
+          "error",
+          {
+            "suffixes": ["Component", "Page", "Widget"]
+          }
+        ],
         "@angular-eslint/component-selector": [
           "error",
           {
