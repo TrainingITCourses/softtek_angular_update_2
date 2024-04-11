@@ -1,5 +1,6 @@
 import { UpperCasePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { environment } from '../../environments/environment';
 import { AuthService } from '../shared/auth.service';
 
 // class FakeAuthService {
@@ -24,6 +25,6 @@ import { AuthService } from '../shared/auth.service';
 export class HeaderComponent {
   #authService = inject(AuthService);
 
-  title = 'Activity Bookings';
+  title = environment.appName;
   user = this.#authService.user;
 }
