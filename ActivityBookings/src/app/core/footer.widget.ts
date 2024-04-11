@@ -3,15 +3,17 @@ import {
   Component,
   EffectRef,
   WritableSignal,
+  computed,
   effect,
   signal,
 } from '@angular/core';
 import { CookiesComponent, CookiesStatus } from './cookies.component';
+import { CreditsComponent } from './credits.component';
 
 @Component({
   selector: 'lab-footer',
   standalone: true,
-  imports: [CookiesComponent],
+  imports: [CookiesComponent, CreditsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <footer>
@@ -26,13 +28,37 @@ import { CookiesComponent, CookiesStatus } from './cookies.component';
         </span>
       </nav>
     </footer>
+    <small>change counter: {{ changeCounter() }}</small>
+
+    <section>
+      <lab-credits [(credits)]="userCredits" />
+      {{ userStars() }}
+    </section>
   `,
 })
 export class FooterWidget {
   cookiesStatus: WritableSignal<CookiesStatus> = signal('pending');
+  changeCounter = signal(0);
+  userCredits = signal(3.14);
 
-  #saveCookiesStatus: EffectRef = effect(() => {
-    console.log('save cookiesStatus', this.cookiesStatus());
+  #saveCredits = effect(() => {
+    console.log('save credits', this.userCredits());
+  });
+
+  #saveCookiesStatus: EffectRef = effect(
+    () => {
+      if (this.cookiesStatus() === 'pending') {
+        return;
+      }
+      this.changeCounter.update((x) => x + 1);
+      console.log('save cookiesStatus', this.cookiesStatus());
+    },
+    { allowSignalWrites: true },
+  );
+
+  userStars = computed(() => {
+    if (this.userCredits() > 10) return '⭐';
+    else return '🌒';
   });
 
   getYear() {
