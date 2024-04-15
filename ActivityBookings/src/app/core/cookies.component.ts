@@ -3,48 +3,49 @@ import {
   Component,
   InputSignal,
   OutputEmitterRef,
-  Signal,
-  computed,
   input,
   output,
 } from '@angular/core';
 
-export type CookiesStatus = 'pending' | 'rejected' | 'essentials' | 'all';
 export type Acceptance = 'essentials' | 'all';
 
 @Component({
   selector: 'lab-cookies',
   standalone: true,
-  imports: [],
-  template: `
-    {{ cookiesMessage() }}
-    @if (!acceptedCookies()) {
-      <button class="contrast outline" (click)="reject.emit()">Reject Cookies</button>
-      <button class="primary outline" (click)="accept.emit('essentials')">Essentials</button>
-      <button class="primary outline" (click)="accept.emit('all')">Accept All</button>
-    }
-  `,
-  styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <dialog [open]="openDialog()">
+      <article>
+        <header>
+          <h2>We use cookies</h2>
+          <p>To ensure you get the best experience on our website.</p>
+        </header>
+        <section>
+          <p>To be compliant with the EU GDPR law, we need your consent to set the cookies.</p>
+        </section>
+        <footer>
+          <button class="contrast outline" (click)="onButtonsClick()">Cancel</button>
+          <button class="secondary outline" (click)="onButtonsClick('essentials')">
+            Essentials
+          </button>
+          <button class="primary outline" (click)="onButtonsClick('all')">Accept all</button>
+        </footer>
+      </article>
+    </dialog>
+  `,
 })
 export class CookiesComponent {
-  cookiesStatus: InputSignal<CookiesStatus> = input.required();
+  /** Output event, with signal-like syntax */
+  cancel: OutputEmitterRef<void> = output();
+  /** Output event with argument, with signal-like syntax */
+  accept: OutputEmitterRef<Acceptance> = output<Acceptance>();
 
-  acceptedCookies: Signal<boolean> = computed(() =>
-    ['essentials', 'all'].includes(this.cookiesStatus()),
-  );
+  /** Input (not required) signal mus have an initial state*/
+  openDialog: InputSignal<boolean> = input(false);
 
-  cookiesMessage: Signal<string> = computed(() => {
-    if (this.cookiesStatus() === 'all') return '💚';
-    else if (this.cookiesStatus() === 'essentials') {
-      return '🤍';
-    } else if (this.cookiesStatus() === 'rejected') {
-      return '🖤';
-    } else {
-      return '❔';
-    }
-  });
-
-  accept: OutputEmitterRef<Acceptance> = output();
-  reject: OutputEmitterRef<void> = output();
+  onButtonsClick(acceptance?: Acceptance) {
+    // Events are emitted
+    if (acceptance) this.accept.emit(acceptance);
+    else this.cancel.emit();
+  }
 }

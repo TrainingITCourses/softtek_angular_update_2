@@ -1,75 +1,99 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EffectRef,
+  Signal,
   WritableSignal,
   computed,
   effect,
   signal,
 } from '@angular/core';
-import { CookiesComponent, CookiesStatus } from './cookies.component';
+import { CookiesComponent } from './cookies.component';
 import { CreditsComponent } from './credits.component';
+import { CookiesStatus, UserStatus } from './user-status.type';
+import { UserComponent } from './user.component';
 
 @Component({
   selector: 'lab-footer',
   standalone: true,
-  imports: [CookiesComponent, CreditsComponent],
+  imports: [CookiesComponent, UserComponent, CreditsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <footer>
       <nav>
-        <span>©️ {{ getYear() }}</span>
-        <span>Usuario</span>
+        <span> {{ getYear() }}</span>
         <span>
-          <lab-cookies
-            [cookiesStatus]="cookiesStatus()"
-            (accept)="onAccept($event)"
-            (reject)="onReject()" />
+          <lab-user [user]="userStatus()" (click)="openDialog.set(true)" />
         </span>
+        <span><lab-credits [(credits)]="userCredits" /></span>
       </nav>
     </footer>
-    <small>change counter: {{ changeCounter() }}</small>
-
-    <section>
-      <lab-credits [(credits)]="userCredits" />
-      {{ userStars() }}
-    </section>
+    <lab-cookies
+      [openDialog]="openDialog()"
+      (accept)="onCookiesUpdate($event)"
+      (cancel)="onCookiesUpdate('rejected')" />
   `,
 })
 export class FooterWidget {
-  cookiesStatus: WritableSignal<CookiesStatus> = signal('pending');
-  changeCounter = signal(0);
-  userCredits = signal(3.14);
+  /**
+   * Registered effects
+   * preferred over constructor
+   * - reveal intention with name
+   * - can be manual destroyed
+   **/
 
-  #saveCredits = effect(() => {
-    console.log('save credits', this.userCredits());
+  #saveCookiesStatus = effect(() => {
+    console.log('saving cookies status', this.#cookiesStatus());
   });
-
-  #saveCookiesStatus: EffectRef = effect(
-    () => {
-      if (this.cookiesStatus() === 'pending') {
-        return;
-      }
-      this.changeCounter.update((x) => x + 1);
-      console.log('save cookiesStatus', this.cookiesStatus());
+  #updateUserCredits = effect(
+    () => this.userStatus.update((state) => ({ ...state, credit: this.userCredits() })),
+    {
+      // ! Do not abuse (try to not propagate state changes)
+      allowSignalWrites: true,
     },
-    { allowSignalWrites: true },
   );
 
-  userStars = computed(() => {
-    if (this.userCredits() > 10) return '⭐';
-    else return '🌒';
+  /**
+   * Related state
+   * (for demo purposes, should be a part of userStatus)
+   */
+
+  userCredits: WritableSignal<number> = signal(0);
+
+  /**
+   * Main state as a writable signal
+   */
+
+  userStatus: WritableSignal<UserStatus> = signal<UserStatus>({
+    cookies: 'pending',
+    credit: this.userCredits(),
   });
 
+  /**
+   * You can compose signals as you wish
+   */
+
+  #cookiesStatus: Signal<CookiesStatus> = computed(() => this.userStatus().cookies);
+  #areCookiesPending: Signal<boolean> = computed(() => this.#cookiesStatus() === 'pending');
+
+  /**
+   * Signals can be initialized from another signal
+   */
+
+  openDialog: WritableSignal<boolean> = signal(this.#areCookiesPending());
+
+  /* Classic functions*/
+
   getYear() {
-    console.log('getYear');
     return new Date().getFullYear();
   }
 
-  onAccept(status: CookiesStatus) {
-    this.cookiesStatus.set(status);
-  }
-  onReject() {
-    this.cookiesStatus.set('rejected');
+  onCookiesUpdate(newStatus: CookiesStatus) {
+    // Set assigns a new reference by default
+    this.openDialog.set(false);
+    // Update wants you to return a new reference
+    this.userStatus.update((state) => {
+      const newState = { ...state, cookies: newStatus };
+      return newState;
+    });
   }
 }

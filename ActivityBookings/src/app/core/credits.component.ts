@@ -1,22 +1,37 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { ChangeDetectionStrategy, Component, ModelSignal, model } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ModelSignal,
+  WritableSignal,
+  model,
+  signal,
+} from '@angular/core';
 
 @Component({
   selector: 'lab-credits',
   standalone: true,
   template: `
     <form>
-      <input type="number" [value]="credits()" (input)="onInput($event)" />
+      <fieldset class="grid">
+        <label for="credit">Set your credit </label>
+        <input type="number" name="credit" [value]="credits()" (input)="onInput($event)" />
+      </fieldset>
     </form>
   `,
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreditsComponent {
+  /** Double input/output binding [(credits)]  */
   credits: ModelSignal<number> = model.required();
 
-  onInput(event: any) {
-    const value = event.target.value;
+  /** Private signals for local state */
+  openDialog: WritableSignal<boolean> = signal(false);
+
+  onInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = target.value;
+    // model signals propagate changes to parent like an output does
     this.credits.set(+value);
   }
 }
