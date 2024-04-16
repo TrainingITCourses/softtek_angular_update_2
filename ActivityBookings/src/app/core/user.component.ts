@@ -18,7 +18,7 @@ import { UserStatus } from './user-status.type';
   `,
 })
 export class UserComponent {
-  /** Input required signal */
+  /** Exposed Input as a required signal */
   user: InputSignal<UserStatus> = input.required<UserStatus>();
 
   /** Compute over input signals for presentation*/

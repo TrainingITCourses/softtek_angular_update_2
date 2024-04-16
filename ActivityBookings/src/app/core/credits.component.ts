@@ -22,10 +22,10 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreditsComponent {
-  /** Double input/output binding [(credits)]  */
+  /** Exposed double binding input/output [(credits)]  */
   credits: ModelSignal<number> = model.required();
 
-  /** Private signals for local state */
+  /** Local signals for local state */
   openDialog: WritableSignal<boolean> = signal(false);
 
   onInput(event: Event) {

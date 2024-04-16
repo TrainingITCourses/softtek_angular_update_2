@@ -35,16 +35,16 @@ export type Acceptance = 'essentials' | 'all';
   `,
 })
 export class CookiesComponent {
-  /** Output event, with signal-like syntax */
-  cancel: OutputEmitterRef<void> = output();
-  /** Output event with argument, with signal-like syntax */
-  accept: OutputEmitterRef<Acceptance> = output<Acceptance>();
-
-  /** Input (not required) signal mus have an initial state*/
+  /** Exposed Input as a not required signal (must have an initial state)*/
   openDialog: InputSignal<boolean> = input(false);
 
+  /** Exposed Output event (signal-like syntax) */
+  cancel: OutputEmitterRef<void> = output();
+  /** Exposed Output event with argument (signal-like syntax) */
+  accept: OutputEmitterRef<Acceptance> = output<Acceptance>();
+
   onButtonsClick(acceptance?: Acceptance) {
-    // Events are emitted
+    // Events are emitted not set
     if (acceptance) this.accept.emit(acceptance);
     else this.cancel.emit();
   }
