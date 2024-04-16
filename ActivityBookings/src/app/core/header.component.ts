@@ -1,5 +1,6 @@
 import { UpperCasePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../shared/auth.service';
 
@@ -12,11 +13,11 @@ import { AuthService } from '../shared/auth.service';
   selector: 'lab-header',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UpperCasePipe],
+  imports: [UpperCasePipe, RouterLink],
   template: `
     <header>
       <nav>
-        <a>🏠 {{ title | uppercase }} </a>
+        <a [routerLink]="['/']">🏠 {{ title | uppercase }} </a>
         <a>👤 {{ user }} </a>
       </nav>
     </header>

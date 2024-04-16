@@ -9,7 +9,6 @@ import { HeaderComponent } from './core/header.component';
   imports: [RouterOutlet, HeaderComponent, FooterWidget],
   template: `
     <lab-header />
-    <h1>Welcome to Modern Angular!</h1>
     <router-outlet />
     <lab-footer />
   `,
