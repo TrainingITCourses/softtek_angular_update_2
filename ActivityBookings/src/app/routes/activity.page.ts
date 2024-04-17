@@ -1,42 +1,57 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AsyncPipe, JsonPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Signal, inject, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Signal,
+  WritableSignal,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs';
+import { Observable, catchError, of, switchMap } from 'rxjs';
 import { ActivitiesRepository } from '../shared/activities.repository';
 
 @Component({
   selector: 'lab-activity',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [JsonPipe, AsyncPipe],
   template: `
-    <h2>activity : {{ id() }}</h2>
-    <!-- <pre>{{ activity() | json }}</pre> -->
-    <!-- <pre>{{ activityComputed$() | async | json }}</pre> -->
-    <pre>{{ activityToSignal() | json }}</pre>
+    <h2>Activity Id: {{ id() }}</h2>
+    <!-- <pre> 1️⃣ {{ activityComputed() | async | json }}</pre> -->
+    <!-- <pre> 2️⃣ {{ activityEffect() | json }}</pre> -->
+    @if (activityToSignal(); as activity) {
+      <pre> {{ activity | json }}</pre>
+    } @else {
+      @if (errorMessage()) {
+        <div>🔥{{ errorMessage() }}</div>
+      } @else {
+        <div>🕸️ No data yet</div>
+      }
+    }
   `,
-  styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class ActivityPage {
-  #activitiesRepository = inject(ActivitiesRepository);
-  id: Signal<string> = input('big bang'); // from the router params
+  #activitiesService = inject(ActivitiesRepository);
+  // ? required?
+  // ? resolver?
+  id: Signal<string> = input<string>('');
 
-  // activity = signal<any>({});
+  // * 0️⃣ - toSignal does not work because this.id() got with initial values
+  //activity: Signal<any> = toSignal(this.#activitiesService.getById$(this.id()));
 
   // * 1️⃣ - computed observable
-  // activityComputed$: Signal<Observable<any>> = computed(() =>
-  //   this.#activitiesRepository.getById$(this.id()),
+  // activityComputed: Signal<Observable<any>> = computed(() =>
+  //   this.#activitiesService.getById$(this.id()),
   // );
 
   // * 2️⃣ - effect changing state
+  // activityEffect: WritableSignal<any> = signal<any>(null);
   // #loadActivity = effect(
   //   () => {
-  //     const activityId = this.id(); // trigger
-  //     if (activityId) {
-  //       this.#activitiesRepository
-  //         .getById$(activityId)
-  //         .subscribe((body) => this.activity.set(body));
+  //     if (this.id()) {
+  //       this.#activitiesService.getById$(this.id()).subscribe((a) => this.activityEffect.set(a));
   //     }
   //   },
   //   {
@@ -45,9 +60,18 @@ export default class ActivityPage {
   // );
 
   // * 3️⃣ - toObservable toSignal
-  // #id$: Observable<string> = toObservable(this.id);
-  activityToSignal: Signal<any> = toSignal(
-    toObservable(this.id).pipe(switchMap((id: string) => this.#activitiesRepository.getById$(id))),
-    { initialValue: { id: this.id() } },
-  );
+  // source observable
+  id$: Observable<string> = toObservable(this.id);
+  // target observable
+  getActivity$ = (id: string) =>
+    this.#activitiesService.getById$(id).pipe(
+      catchError((error) => {
+        this.errorMessage.set(error.message);
+        return of(undefined);
+      }),
+    );
+  activityToSignal = toSignal(this.id$.pipe(switchMap(this.getActivity$)));
+
+  /** Error signal */
+  errorMessage: WritableSignal<string | undefined> = signal(undefined);
 }
