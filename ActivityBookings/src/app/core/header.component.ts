@@ -1,7 +1,8 @@
 import { UpperCasePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { environment } from '../../environments/environment';
+import { AuthStore } from '../shared/auth.store';
 
 // class FakeAuthService {
 //   user = 'fake';
@@ -17,12 +18,18 @@ import { environment } from '../../environments/environment';
     <header>
       <nav>
         <a [routerLink]="['/']">🏠 {{ title | uppercase }} </a>
-        <a [routerLink]="['/login']">👤 Login </a>
-        <a [routerLink]="['/register']">👤 Register </a>
+        @if (isAnonymous()) {
+          <a [routerLink]="['/login']">👤 Login </a>
+          <a [routerLink]="['/register']">👤 Register </a>
+        } @else {
+          <span>🧑‍🦰 {{ 'user' }}</span>
+        }
       </nav>
     </header>
   `,
 })
 export class HeaderComponent {
+  #authStore = inject(AuthStore);
   title = environment.appName;
+  isAnonymous = this.#authStore.isAnonymous;
 }
