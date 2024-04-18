@@ -36,7 +36,7 @@ export default class ActivityPage {
   #activitiesService = inject(ActivitiesRepository);
   // ? required?
   // ? resolver?
-  id: Signal<string> = input<string>('');
+  id: Signal<string> = input<string>('');// from router param
 
   // * 0️⃣ - toSignal does not work because this.id() got with initial values
   //activity: Signal<any> = toSignal(this.#activitiesService.getById$(this.id()));

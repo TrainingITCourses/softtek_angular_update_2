@@ -1,8 +1,7 @@
 import { UpperCasePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { environment } from '../../environments/environment';
-import { AuthService } from '../shared/auth.service';
 
 // class FakeAuthService {
 //   user = 'fake';
@@ -18,14 +17,12 @@ import { AuthService } from '../shared/auth.service';
     <header>
       <nav>
         <a [routerLink]="['/']">🏠 {{ title | uppercase }} </a>
-        <a>👤 {{ user }} </a>
+        <a [routerLink]="['/login']">👤 Login </a>
+        <a [routerLink]="['/register']">👤 Register </a>
       </nav>
     </header>
   `,
 })
 export class HeaderComponent {
-  #authService = inject(AuthService);
-
   title = environment.appName;
-  user = this.#authService.user;
 }
