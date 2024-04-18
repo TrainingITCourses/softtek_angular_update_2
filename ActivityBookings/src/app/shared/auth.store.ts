@@ -39,7 +39,7 @@ export class AuthStore {
   state: Signal<Auth | undefined> = this.#state.asReadonly();
 
   isAnonymous: Signal<boolean> = computed(() => !this.#state());
-
+  isAuthenticated: Signal<boolean> = computed(() => !this.isAnonymous());
   accessToken: Signal<string | undefined> = computed(() => this.#state()?.accessToken);
 
   login(auth: Auth): void {
