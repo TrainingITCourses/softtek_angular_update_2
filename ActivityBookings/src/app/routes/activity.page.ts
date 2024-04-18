@@ -9,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 import { Observable, catchError, of, switchMap } from 'rxjs';
 import { ActivitiesRepository } from '../shared/activities.repository';
 
@@ -22,6 +23,7 @@ import { ActivitiesRepository } from '../shared/activities.repository';
     <!-- <pre> 1️⃣ {{ activityComputed() | async | json }}</pre> -->
     <!-- <pre> 2️⃣ {{ activityEffect() | json }}</pre> -->
     @if (activityToSignal(); as activity) {
+      <small> From param to signal</small>
       <pre> {{ activity | json }}</pre>
     } @else {
       @if (errorMessage()) {
@@ -30,14 +32,17 @@ import { ActivitiesRepository } from '../shared/activities.repository';
         <div>🕸️ No data yet</div>
       }
     }
+    <small> From router resolver</small>
+    <pre>{{ activityResolved | json }}</pre>
   `,
 })
 export default class ActivityPage {
   #activitiesService = inject(ActivitiesRepository);
+  #route = inject(ActivatedRoute);
   // ? required?
   // ? resolver?
-  id: Signal<string> = input<string>('');// from router param
-
+  id: Signal<string> = input<string>(''); // from router param
+  activityResolved = this.#route.snapshot.data['activityResolved'];
   // * 0️⃣ - toSignal does not work because this.id() got with initial values
   //activity: Signal<any> = toSignal(this.#activitiesService.getById$(this.id()));
 
