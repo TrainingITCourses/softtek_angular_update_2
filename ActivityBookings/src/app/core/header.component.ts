@@ -1,5 +1,5 @@
 import { UpperCasePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { AuthStore } from '../shared/auth.store';
@@ -29,7 +29,8 @@ import { AuthStore } from '../shared/auth.store';
   `,
 })
 export class HeaderComponent {
-  #authStore = inject(AuthStore);
-  title = environment.appName;
-  isAnonymous = this.#authStore.isAnonymous;
+  #authStore: AuthStore = inject(AuthStore);
+  isAnonymous: Signal<boolean> = this.#authStore.isAnonymous;
+  // isAnonymous: Signal<boolean> = computed(() => !this.#authStore.state());
+  title: string = environment.appName;
 }
